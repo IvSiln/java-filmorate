@@ -26,7 +26,7 @@ public class FilmController {
     }
 
     public Integer generateId() {
-        return filmId++;
+        return ++filmId;
     }
 
     @PostMapping
