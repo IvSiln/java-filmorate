@@ -5,27 +5,28 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
+import ru.yandex.practicum.filmorate.validator.MinDateRelease;
 
 import javax.validation.constraints.*;
-import java.time.Duration;
 import java.time.LocalDate;
 
 @Data
 @AllArgsConstructor
 @Builder(toBuilder = true)
 public class Film {
-    @NotNull
-    private Integer id;
+    private int id;
     @NotBlank
     private String name;
-    @Size(max = 200)
     @NotBlank
+    @Size(min = 1, max = 200)
     private String description;
-    @NotBlank
+    @NotNull
     @JsonFormat(pattern = "yyyy-MM-dd")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-   private LocalDate releaseDate;
+    @MinDateRelease
+    @Past(message = "Не выерная дате выхода фильма")
+    private LocalDate releaseDate;
     @NotNull
     @Positive
-    private Duration duration;
+    private int duration;
 }

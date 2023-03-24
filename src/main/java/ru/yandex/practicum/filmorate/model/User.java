@@ -20,9 +20,9 @@ public class User {
     @NotBlank
     private String email;
     @NotBlank
-    String login;
-    String name;
-    @Past
+    private String login;
+    private String name;
+    @Past(message = "Не верная дата рождения")
     @JsonFormat(pattern = "yyyy-MM-dd")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     LocalDate birthday;

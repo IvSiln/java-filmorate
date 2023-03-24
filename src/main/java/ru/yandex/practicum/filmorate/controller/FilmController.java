@@ -31,7 +31,11 @@ public class FilmController {
 
     @PostMapping
     public Film createFilm(@Valid @RequestBody Film film) {
-        isValidDate(film);
+        for (Film entry : filmMap.values()) {
+            if (entry.getName().equals(film.getName())) {
+                throw new ValidationException("Фильм уже есть в нашей базе");
+            }
+        }
         film.setId(generateId());
         filmMap.put(film.getId(), film);
         log.trace("Добавален новый фильм {}", film);
@@ -42,7 +46,7 @@ public class FilmController {
     public Film updateFilm(@RequestBody Film film) {
         if (filmMap.containsKey(film.getId())) {
             filmMap.put(film.getId(), film);
-            log.trace("Обновлен фильм: {}",film);
+            log.trace("Обновлен фильм: {}", film);
             return film;
         } else throw new ValidationException("Фильма с таким id нет в базе");
     }
@@ -51,17 +55,4 @@ public class FilmController {
     public List<Film> getAllFilms() {
         return new ArrayList<>(filmMap.values());
     }
-
-    private void isValidDate(Film film) {
-        if (film.getReleaseDate().isBefore(START_DATE)) {
-            log.warn(film.getReleaseDate().toString());
-            throw new ValidationException("Дата выхода фильма не может быть раньше " + START_DATE);
-        }
-        for (Film valueComparison : filmMap.values()) {
-            if (valueComparison.getName().equals(film.getName())) {
-                throw new ValidationException("Фильм уже есть в нашей базе");
-            }
-        }
-    }
-
 }
