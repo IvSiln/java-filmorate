@@ -16,7 +16,6 @@ import java.util.Map;
 @RequestMapping("/films")
 @Slf4j
 public class FilmController {
-    static final LocalDate START_DATE = LocalDate.of(1985, 12, 28);
     Map<Integer, Film> filmMap;
     private int filmId;
 
