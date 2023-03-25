@@ -10,7 +10,7 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Past;
 import java.time.LocalDate;
-
+//какой-то произвольный текст, чтоб пул реквест прошел
 @Data
 @AllArgsConstructor
 @Builder(toBuilder = true)
