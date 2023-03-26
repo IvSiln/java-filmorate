@@ -17,7 +17,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/films")
 @Slf4j
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@FieldDefaults(level = AccessLevel.PACKAGE)
 public class FilmController {
     static final LocalDate START_DATE = LocalDate.of(1985, 12, 28);
     final Map<Integer, Film> filmMap;

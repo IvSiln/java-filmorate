@@ -16,7 +16,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/users")
 @Slf4j
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@FieldDefaults(level = AccessLevel.PACKAGE)
 public class UserController {
     static int userId;
     final Map<Integer, User> userMap;
