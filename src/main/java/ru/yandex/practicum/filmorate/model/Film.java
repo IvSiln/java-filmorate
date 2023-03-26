@@ -15,7 +15,7 @@ import java.time.LocalDate;
 @Data
 @AllArgsConstructor
 @Builder(toBuilder = true)
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@FieldDefaults(level = AccessLevel.PROTECTED)
 public class Film {
     int id;
     @NotBlank
