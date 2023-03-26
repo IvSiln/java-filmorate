@@ -1,5 +1,7 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
@@ -14,10 +16,10 @@ import java.util.Map;
 @RestController
 @RequestMapping("/users")
 @Slf4j
-
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserController {
-    static private int userId;
-    private final Map<Integer, User> userMap;
+    static int userId;
+    final Map<Integer, User> userMap;
 
     public UserController() {
         userMap = new HashMap<>();
