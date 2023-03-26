@@ -46,9 +46,9 @@ public class FilmController {
     public Film updateFilm(@RequestBody Film film) {
         if (filmMap.containsKey(film.getId())) {
             filmMap.put(film.getId(), film);
-            log.trace("Обновлен фильм: {}",film);
+            log.trace("Обновлен фильм: {}", film);
             return film;
-        } else throw new ValidationException("Фильма с таким id нет в базе");
+        } else throw new ValidationException("Фильма с " + film.getId() + " нет в базе");
     }
 
     @GetMapping
