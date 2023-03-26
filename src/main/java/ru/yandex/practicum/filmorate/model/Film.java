@@ -18,18 +18,12 @@ import java.time.LocalDate;
 @FieldDefaults(level = AccessLevel.PROTECTED)
 public class Film {
     int id;
-    @NotBlank
-    String name;
-    @NotBlank
-    @Size(min = 1, max = 200)
-    String description;
+    @NotBlank String name;
+    @NotBlank @Size(min = 1, max = 200) String description;
     @NotNull
     @JsonFormat(pattern = "yyyy-MM-dd")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     @MinDateRelease
-    @Past(message = "Не выерная дате выхода фильма")
-    LocalDate releaseDate;
-    @NotNull
-    @Positive
-    int duration;
+    @Past(message = "Не выерная дате выхода фильма") LocalDate releaseDate;
+    @NotNull @Positive int duration;
 }

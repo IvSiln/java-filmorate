@@ -19,11 +19,8 @@ import java.time.LocalDate;
 @FieldDefaults(level = AccessLevel.PROTECTED)
 public class User {
     Integer id;
-    @Email
-    @NotBlank
-    String email;
-    @NotBlank
-    String login;
+    @Email @NotBlank String email;
+    @NotBlank String login;
     String name;
     @Past(message = "Не верная дата рождения")
     @JsonFormat(pattern = "yyyy-MM-dd")
