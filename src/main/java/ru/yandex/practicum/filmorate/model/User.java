@@ -8,6 +8,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Past;
+import javax.validation.constraints.Positive;
 import java.time.LocalDate;
 import java.util.Set;
 
@@ -16,8 +17,10 @@ import java.util.Set;
 @Builder(toBuilder = true)
 @FieldDefaults(level = AccessLevel.PROTECTED)
 public class User {
+    @NonNull
+    @Positive
     long id;
-    @Email @NotBlank String email;
+    @Email String email;
     @NotBlank String login;
     @EqualsAndHashCode.Exclude
     String name;

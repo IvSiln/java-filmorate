@@ -1,7 +1,5 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import lombok.AccessLevel;
-import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -14,9 +12,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/users")
 @Slf4j
-@FieldDefaults(level = AccessLevel.PACKAGE)
 public class UserController {
-    final UserService userService;
+    private final UserService userService;
 
     @Autowired
     public UserController(UserService userService) {
@@ -63,4 +60,3 @@ public class UserController {
         userService.deleteFromFriends(id, otherId);
     }
 }
-

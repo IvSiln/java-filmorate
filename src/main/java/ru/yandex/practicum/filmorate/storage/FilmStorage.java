@@ -16,4 +16,6 @@ public interface FilmStorage {
     boolean isContains(Long id);
 
     Film deleteFilm(long id);
+
+    List<Film> getTopFilms(int count);
 }

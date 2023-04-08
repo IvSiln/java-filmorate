@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -13,47 +13,47 @@ import java.util.List;
 @Service
 public class FilmService {
     static final LocalDate START_DATE = LocalDate.of(1985, 12, 28);
-    private final InMemoryFilmStorage inMemoryFilmStorage;
+    private final FilmStorage filmStorage;
 
     @Autowired
-    public FilmService(InMemoryFilmStorage inMemoryFilmStorage) {
-        this.inMemoryFilmStorage = inMemoryFilmStorage;
+    public FilmService(FilmStorage filmStorage) {
+        this.filmStorage = filmStorage;
     }
 
     public boolean addLike(Long filmId, Long userId) {
-        return inMemoryFilmStorage.getFilm(filmId).getLikes().add(userId);
+        return filmStorage.getFilm(filmId).getLikes().add(userId);
     }
 
     public boolean deleteLike(Long filmId, Long userId) {
-        return inMemoryFilmStorage.getFilm(filmId).getLikes().remove(userId);
+        return filmStorage.getFilm(filmId).getLikes().remove(userId);
     }
 
     public Film createFilm(Film film) {
         isValidFilm(film);
-        return inMemoryFilmStorage.createFilm(film);
+        return filmStorage.createFilm(film);
     }
 
     public Film updateFilm(Film film) {
         isValidFilm(film);
-        if (inMemoryFilmStorage.isContains(film.getId())) {
-            return inMemoryFilmStorage.updateFilm(film);
+        if (filmStorage.isContains(film.getId())) {
+            return filmStorage.updateFilm(film);
         }
         throw new NotFoundException("Фильм не найден");
     }
 
     public List<Film> getAllFilms() {
-        return inMemoryFilmStorage.getAllFilms();
+        return filmStorage.getAllFilms();
     }
 
     public Film getFilmById(long filmId) {
-        if (inMemoryFilmStorage.isContains(filmId)) {
-            return inMemoryFilmStorage.getFilm(filmId);
+        if (filmStorage.isContains(filmId)) {
+            return filmStorage.getFilm(filmId);
         }
         throw new NotFoundException("Фильм не найден");
     }
 
     public List<Film> getTopFilms(int count) {
-        return inMemoryFilmStorage.getTopFilms(count);
+        return filmStorage.getTopFilms(count);
     }
 
     public void isValidFilm(Film film) {

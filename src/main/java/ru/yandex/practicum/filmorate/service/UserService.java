@@ -1,67 +1,70 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.List;
 
+@Service
+@Slf4j
 public class UserService {
-    private final InMemoryUserStorage inMemoryUserStorage;
+    private final UserStorage userStorage;
 
     @Autowired
-    public UserService(InMemoryUserStorage inMemoryUserStorage) {
-        this.inMemoryUserStorage = inMemoryUserStorage;
+    public UserService(UserStorage userStorage) {
+        this.userStorage = userStorage;
     }
 
     public User createUser(User user) {
-        return inMemoryUserStorage.createUser(user);
+        return userStorage.createUser(user);
     }
 
     public User updateUser(User user) {
-        return inMemoryUserStorage.updateUser(user);
+        return userStorage.updateUser(user);
     }
 
     public User getUserById(long id) {
-        if (inMemoryUserStorage.isContains(id)) {
-            return inMemoryUserStorage.getUserById(id);
+        if (userStorage.isContains(id)) {
+            return userStorage.getUserById(id);
         }
         throw new NotFoundException("Пользователь не найден");
     }
 
     public List<User> getAllUsers() {
-        return inMemoryUserStorage.getAllUsers();
+        return userStorage.getAllUsers();
     }
 
     public void addToFriends(long userId, long friendId) {
         isCheckFriend(userId, friendId);
-        inMemoryUserStorage.getUserById(userId).getFriends().add(friendId);
-        inMemoryUserStorage.getUserById(friendId).getFriends().add(userId);
+        userStorage.getUserById(userId).getFriends().add(friendId);
+        userStorage.getUserById(friendId).getFriends().add(userId);
     }
 
     public void deleteFromFriends(long userId, long friendId) {
         isCheckFriend(userId, friendId);
-        inMemoryUserStorage.getUserById(userId).getFriends().remove(friendId);
-        inMemoryUserStorage.getUserById(friendId).getFriends().remove(userId);
+        userStorage.getUserById(userId).getFriends().remove(friendId);
+        userStorage.getUserById(friendId).getFriends().remove(userId);
     }
 
     public List<User> getAllFriends(long userId) {
-        return inMemoryUserStorage.getAllFriends(userId);
+        return userStorage.getAllFriends(userId);
     }
 
     public List<User> getCommonFriends(long id, long otherId) {
         isCheckFriend(id, otherId);
-        return inMemoryUserStorage.getCommonFriends(id, otherId);
+        return userStorage.getCommonFriends(id, otherId);
     }
 
     private void isCheckFriend(Long userId, Long friendId) {
-        if (!inMemoryUserStorage.isContains(userId)) {
+        if (!userStorage.isContains(userId)) {
             throw new NotFoundException("Пользователь не найден");
         }
-        if (!inMemoryUserStorage.isContains(friendId)) {
+        if (!userStorage.isContains(friendId)) {
             throw new NotFoundException("Друг не найден");
         }
     }
 }
-

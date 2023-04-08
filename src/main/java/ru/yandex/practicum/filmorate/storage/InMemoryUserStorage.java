@@ -15,14 +15,6 @@ import java.util.stream.Collectors;
 public class InMemoryUserStorage implements UserStorage {
     private final Map<Long, User> users = new HashMap<>();
 
-    public Map<Long, User> getUsers() {
-        return users;
-    }
-
-    public User getUserById(long id) {
-        return getUsers().get(id);
-    }
-
     @Override
     public User createUser(User user) {
         users.put(user.getId(), user);
@@ -34,6 +26,11 @@ public class InMemoryUserStorage implements UserStorage {
         deleteUser(user.getId());
         users.put(user.getId(), user);
         return user;
+    }
+
+    @Override
+    public User getUserById(Long id) {
+        return users.get(id);
     }
 
     @Override
@@ -55,17 +52,8 @@ public class InMemoryUserStorage implements UserStorage {
         return users.containsKey(friendId);
     }
 
-    public List<User> getAllFriends(long userId) {
-        List<User> userFriends = new ArrayList<>();
-        if (getUserById(userId).getFriends() != null) {
-            for (long id : getUserById(userId).getFriends()) {
-                userFriends.add(getUserById(id));
-            }
-        }
-        return userFriends;
-    }
-
-    public List<User> getCommonFriends(long id, long otherId) {
+    @Override
+    public List getCommonFriends(Long id, Long otherId) {
         List<User> commonFriends = new ArrayList<>();
         List<User> userFriends = getAllFriends(id);
         List<User> otherUserFriends = getAllFriends(otherId);
@@ -73,5 +61,16 @@ public class InMemoryUserStorage implements UserStorage {
             commonFriends = userFriends.stream().filter(otherUserFriends::contains).collect(Collectors.toList());
         }
         return commonFriends;
+    }
+
+    @Override
+    public List<User> getAllFriends(Long userId) {
+        List<User> userFriends = new ArrayList<>();
+        if (getUserById(userId).getFriends() != null) {
+            for (long id : getUserById(userId).getFriends()) {
+                userFriends.add(getUserById(id));
+            }
+        }
+        return userFriends;
     }
 }
