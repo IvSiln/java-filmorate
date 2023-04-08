@@ -24,10 +24,10 @@ public class UserService {
     }
 
     public User getUserById(long id) {
-        if (!inMemoryUserStorage.isContains(id)) {
-            throw new NotFoundException("Пользователь не найден");
+        if (inMemoryUserStorage.isContains(id)) {
+            return inMemoryUserStorage.getUserById(id);
         }
-        return inMemoryUserStorage.getUserById(id);
+        throw new NotFoundException("Пользователь не найден");
     }
 
     public List<User> getAllUsers() {

@@ -35,10 +35,10 @@ public class FilmService {
 
     public Film updateFilm(Film film) {
         isValidFilm(film);
-        if (!inMemoryFilmStorage.isContains(film.getId())) {
-            throw new NotFoundException("Фильм не найден");
+        if (inMemoryFilmStorage.isContains(film.getId())) {
+            return inMemoryFilmStorage.updateFilm(film);
         }
-        return inMemoryFilmStorage.updateFilm(film);
+        throw new NotFoundException("Фильм не найден");
     }
 
     public List<Film> getAllFilms() {
@@ -46,10 +46,10 @@ public class FilmService {
     }
 
     public Film getFilmById(long filmId) {
-        if (!inMemoryFilmStorage.isContains(filmId)) {
-            throw new NotFoundException("Фильм не найден");
+        if (inMemoryFilmStorage.isContains(filmId)) {
+            return inMemoryFilmStorage.getFilm(filmId);
         }
-        return inMemoryFilmStorage.getFilm(filmId);
+        throw new NotFoundException("Фильм не найден");
     }
 
     public List<Film> getTopFilms(int count) {
