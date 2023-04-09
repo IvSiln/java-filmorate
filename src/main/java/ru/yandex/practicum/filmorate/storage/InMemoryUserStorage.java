@@ -73,14 +73,14 @@ public class InMemoryUserStorage implements UserStorage {
 
     public boolean isValid(User user) {
         if (!user.getEmail().contains("@")) {
-            throw new ValidationException("Некорректный e-mail пользователя: " + user.getEmail());
+            throw new ValidationException("Неправильный e-mail пользователя: " + user.getEmail());
         }
         if ((user.getLogin().isEmpty()) || (user.getLogin().contains(" "))) {
-            throw new ValidationException("Некорректный логин пользователя: " + user.getLogin());
+            throw new ValidationException("Неправильный логин пользователя: " + user.getLogin());
         }
 
         if (user.getBirthday().isAfter(LocalDate.now())) {
-            throw new ValidationException("Некорректная дата рождения пользователя: " + user.getBirthday());
+            throw new ValidationException("Неправильная дата рождения пользователя: " + user.getBirthday());
         }
         return true;
     }

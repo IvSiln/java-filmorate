@@ -14,17 +14,17 @@ import java.util.List;
 @RequestMapping("/users")
 @Slf4j
 public class UserController {
-    private final UserService userService;
     private final UserStorage userStorage;
+    private final UserService userService;
 
     @Autowired
-    public UserController(UserService userService, UserStorage userStorage) {
-        this.userService = userService;
+    public UserController(UserStorage userStorage, UserService userService) {
         this.userStorage = userStorage;
+        this.userService = userService;
     }
 
-    @GetMapping()
-    public List<User> getAllUsers() {
+    @GetMapping
+    public List<User> getUsers() {
         return userStorage.getUsers();
     }
 
@@ -43,23 +43,35 @@ public class UserController {
         return userService.getCommonFriends(id, otherId);
     }
 
-    @PostMapping
-    public User createUser(@Valid @RequestBody User user) {
-        return userStorage.create(user);
-    }
-
-    @PutMapping
-    public User updateUser(@Valid @RequestBody User user) {
-        return userStorage.update(user);
-    }
-
-    @PutMapping("{id}/friends/{fiendId}")
-    public void addFried(@PathVariable Long id, @PathVariable Long friendId) {
+    @PutMapping("/{id}/friends/{friendId}")
+    public void addFriend(@PathVariable Long id, @PathVariable Long friendId) {
         userService.addFriend(id, friendId);
     }
 
-    @DeleteMapping("{id}/friends/common/{otherId}")
-    public void deleteFriend(@PathVariable Long id, @PathVariable Long otherId) {
-        userService.deleteFriend(id, otherId);
+    @DeleteMapping("/{id}/friends/{friendId}")
+    public void deleteFriend(@PathVariable Long id, @PathVariable Long friendId) {
+        userService.deleteFriend(id, friendId);
+    }
+
+    @ResponseBody
+    @PostMapping
+    public User create(@Valid @RequestBody User user) {
+        log.info("Получен POST-запрос к эндпоинту: '/users' на добавление пользователя");
+        user = userStorage.create(user);
+        return user;
+    }
+
+    @ResponseBody
+    @PutMapping
+    public User update(@Valid @RequestBody User user) {
+        log.info("Получен PUT-запрос к эндпоинту: '/users' на обновление пользователя с ID={}", user.getId());
+        user = userStorage.update(user);
+        return user;
+    }
+
+    @DeleteMapping("/{id}")
+    public User delete(@PathVariable Long id) {
+        log.info("Получен DELETE-запрос к эндпоинту: '/users' на удаление пользователя с ID={}", id);
+        return userStorage.delete(id);
     }
 }

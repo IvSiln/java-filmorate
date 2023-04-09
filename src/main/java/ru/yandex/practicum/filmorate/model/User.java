@@ -15,7 +15,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Data
-@Builder(toBuilder = true)
+@Builder
 @FieldDefaults(level = AccessLevel.PROTECTED)
 public class User {
     Long id;
