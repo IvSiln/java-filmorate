@@ -17,7 +17,6 @@ import java.util.Map;
 @Slf4j
 public class InMemoryFilmStorage implements FilmStorage {
     private final Map<Long, Film> films;
-    private final LocalDate START_DATE = LocalDate.of(1895, 12, 28);
     private Long currentId;
 
     @Autowired
@@ -75,7 +74,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         if ((film.getDescription().length()) > 200 || (film.getDescription().isEmpty())) {
             throw new ValidationException("Максимальная длинна описания 200 знаков или пустое: " + film.getDescription().length());
         }
-        if (film.getReleaseDate().isBefore(START_DATE)) {
+        if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
             throw new ValidationException("Не возможно добавить фильмы с датой релиза раньше: " + film.getReleaseDate());
         }
         if (film.getDuration() <= 0) {
