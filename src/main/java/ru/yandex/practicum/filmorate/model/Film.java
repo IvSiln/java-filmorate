@@ -15,7 +15,7 @@ import java.util.Set;
 @Builder(toBuilder = true)
 @FieldDefaults(level = AccessLevel.PROTECTED)
 public class Film {
-    long id;
+    Long id;
     @NotBlank String name;
     @NotBlank @Size(min = 1, max = 200) String description;
     @NotNull
@@ -25,7 +25,7 @@ public class Film {
     @Past(message = "Не верная дате выхода фильма") LocalDate releaseDate;
     @NotNull @Positive
     @EqualsAndHashCode.Exclude
-    int duration;
+    Integer duration;
     @EqualsAndHashCode.Exclude
     Set<Long> likes;
 }

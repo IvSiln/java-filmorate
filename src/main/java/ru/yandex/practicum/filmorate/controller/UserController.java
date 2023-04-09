@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -14,25 +15,27 @@ import java.util.List;
 @Slf4j
 public class UserController {
     private final UserService userService;
+    private final UserStorage userStorage;
 
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(UserService userService, UserStorage userStorage) {
         this.userService = userService;
+        this.userStorage = userStorage;
     }
 
     @GetMapping()
     public List<User> getAllUsers() {
-        return userService.getAllUsers();
+        return userStorage.getUsers();
     }
 
     @GetMapping("/{id}")
     public User getUserById(@PathVariable Long id) {
-        return userService.getUserById(id);
+        return userStorage.getUserById(id);
     }
 
     @GetMapping("/{id}/friends")
     public List<User> getFriends(@PathVariable Long id) {
-        return userService.getAllFriends(id);
+        return userService.getFriends(id);
     }
 
     @GetMapping("/{id}/friends/common/{otherId}")
@@ -42,21 +45,21 @@ public class UserController {
 
     @PostMapping
     public User createUser(@Valid @RequestBody User user) {
-        return userService.createUser(user);
+        return userStorage.create(user);
     }
 
     @PutMapping
     public User updateUser(@Valid @RequestBody User user) {
-        return userService.updateUser(user);
+        return userStorage.update(user);
     }
 
     @PutMapping("{id}/friends/{fiendId}")
     public void addFried(@PathVariable Long id, @PathVariable Long friendId) {
-        userService.addToFriends(id, friendId);
+        userService.addFriend(id, friendId);
     }
 
     @DeleteMapping("{id}/friends/common/{otherId}")
     public void deleteFriend(@PathVariable Long id, @PathVariable Long otherId) {
-        userService.deleteFromFriends(id, otherId);
+        userService.deleteFriend(id, otherId);
     }
 }

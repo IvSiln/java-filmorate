@@ -1,76 +1,87 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Component
 @Slf4j
 public class InMemoryUserStorage implements UserStorage {
-    private final Map<Long, User> users = new HashMap<>();
+    private final Map<Long, User> users;
+    private Long currentId;
+
+    @Autowired
+    public InMemoryUserStorage() {
+        this.users = new HashMap<>();
+        this.currentId = 0L;
+    }
+
+    public List<User> getUsers() {
+        return new ArrayList<>(users.values());
+    }
 
     @Override
-    public User createUser(User user) {
-        users.put(user.getId(), user);
+    public User create(User user) {
+        if (isValid(user)) {
+            user.setId(++currentId);
+            users.put(user.getId(), user);
+        }
         return user;
     }
 
     @Override
-    public User updateUser(User user) {
-        deleteUser(user.getId());
-        users.put(user.getId(), user);
+    public User update(User user) {
+        check(user.getId());
+        if (isValid(user)) {
+            users.put(user.getId(), user);
+        }
         return user;
     }
 
     @Override
     public User getUserById(Long id) {
+        check(id);
         return users.get(id);
     }
 
     @Override
-    public List<User> getAllUsers() {
-        List<User> userList = new ArrayList<>();
-        for (Map.Entry<Long, User> entry : users.entrySet()) {
-            userList.add(entry.getValue());
+    public User delete(Long userId) {
+        check(userId);
+        for (User user : users.values()) {
+            user.getFriends().remove(userId);
         }
-        return userList;
+        return users.remove(userId);
     }
 
-    @Override
-    public User deleteUser(long id) {
-        return users.remove(id);
-    }
-
-    @Override
-    public boolean isContains(long friendId) {
-        return users.containsKey(friendId);
-    }
-
-    @Override
-    public List<User> getCommonFriends(Long id, Long otherId) {
-        List<User> commonFriends = new ArrayList<>();
-        List<User> userFriends = getAllFriends(id);
-        List<User> otherUserFriends = getAllFriends(otherId);
-        if (otherUserFriends != null) {
-            commonFriends = userFriends.stream().filter(otherUserFriends::contains).collect(Collectors.toList());
+    private void check(Long userId) {
+        if (userId == null) {
+            throw new ValidationException("Пользователю не присвоен id");
         }
-        return commonFriends;
+        if (!users.containsKey(userId)) {
+            throw new NotFoundException("Пользователь с ID=" + userId + " не найден!");
+        }
     }
 
-    @Override
-    public List<User> getAllFriends(Long userId) {
-        List<User> userFriends = new ArrayList<>();
-        if (getUserById(userId).getFriends() != null) {
-            for (long id : getUserById(userId).getFriends()) {
-                userFriends.add(getUserById(id));
-            }
+    public boolean isValid(User user) {
+        if (!user.getEmail().contains("@")) {
+            throw new ValidationException("Некорректный e-mail пользователя: " + user.getEmail());
         }
-        return userFriends;
+        if ((user.getLogin().isEmpty()) || (user.getLogin().contains(" "))) {
+            throw new ValidationException("Некорректный логин пользователя: " + user.getLogin());
+        }
+
+        if (user.getBirthday().isAfter(LocalDate.now())) {
+            throw new ValidationException("Некорректная дата рождения пользователя: " + user.getBirthday());
+        }
+        return true;
     }
 }

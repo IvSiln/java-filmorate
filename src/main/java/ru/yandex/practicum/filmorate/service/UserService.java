@@ -3,11 +3,13 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @Slf4j
@@ -19,52 +21,40 @@ public class UserService {
         this.userStorage = userStorage;
     }
 
-    public User createUser(User user) {
-        return userStorage.createUser(user);
+    public void addFriend(Long userId, Long friendId) {
+        User user = userStorage.getUserById(userId);
+        User friend = userStorage.getUserById(friendId);
+        user.getFriends().add(friendId);
+        friend.getFriends().add(userId);
     }
 
-    public User updateUser(User user) {
-        return userStorage.updateUser(user);
+    public void deleteFriend(Long userId, Long friendId) {
+        User user = userStorage.getUserById(userId);
+        User friend = userStorage.getUserById(friendId);
+        user.getFriends().remove(friendId);
+        friend.getFriends().remove(userId);
     }
 
-    public User getUserById(long id) {
-        if (userStorage.isContains(id)) {
-            return userStorage.getUserById(id);
+    public List<User> getFriends(Long userId) {
+        User user = userStorage.getUserById(userId);
+        List<User> friends = new ArrayList<>();
+        if (user.getFriends() != null) {
+            for (Long currentId : user.getFriends()) {
+                friends.add(userStorage.getUserById(currentId));
+            }
         }
-        throw new NotFoundException("Пользователь не найден");
+        return friends;
     }
 
-    public List<User> getAllUsers() {
-        return userStorage.getAllUsers();
-    }
-
-    public void addToFriends(long userId, long friendId) {
-        isCheckFriend(userId, friendId);
-        userStorage.getUserById(userId).getFriends().add(friendId);
-        userStorage.getUserById(friendId).getFriends().add(userId);
-    }
-
-    public void deleteFromFriends(long userId, long friendId) {
-        isCheckFriend(userId, friendId);
-        userStorage.getUserById(userId).getFriends().remove(friendId);
-        userStorage.getUserById(friendId).getFriends().remove(userId);
-    }
-
-    public List<User> getAllFriends(long userId) {
-        return userStorage.getAllFriends(userId);
-    }
-
-    public List<User> getCommonFriends(long id, long otherId) {
-        isCheckFriend(id, otherId);
-        return userStorage.getCommonFriends(id, otherId);
-    }
-
-    private void isCheckFriend(Long userId, Long friendId) {
-        if (!userStorage.isContains(userId)) {
-            throw new NotFoundException("Пользователь не найден");
+    public List<User> getCommonFriends(Long firstUserId, Long secondUserId) {
+        User firstUser = userStorage.getUserById(firstUserId);
+        User secondUser = userStorage.getUserById(secondUserId);
+        Set<Long> intersection = new HashSet<>(firstUser.getFriends());
+        intersection.retainAll(secondUser.getFriends());
+        List<User> commonFriends = new ArrayList<>();
+        for (Long i : intersection) {
+            commonFriends.add(userStorage.getUserById(i));
         }
-        if (!userStorage.isContains(friendId)) {
-            throw new NotFoundException("Друг не найден");
-        }
+        return commonFriends;
     }
 }
