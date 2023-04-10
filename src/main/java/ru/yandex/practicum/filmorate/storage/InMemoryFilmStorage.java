@@ -1,13 +1,11 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,7 +17,6 @@ public class InMemoryFilmStorage implements FilmStorage {
     private final Map<Long, Film> films;
     private Long currentId;
 
-    @Autowired
     public InMemoryFilmStorage() {
         films = new HashMap<>();
         currentId = 0L;
@@ -32,7 +29,6 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film create(Film film) {
-        isValid(film);
         film.setId(++currentId);
         films.put(film.getId(), film);
         return film;
@@ -41,7 +37,6 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public Film update(Film film) {
         check(film.getId());
-        isValid(film);
         films.put(film.getId(), film);
         return film;
     }
@@ -64,21 +59,6 @@ public class InMemoryFilmStorage implements FilmStorage {
         }
         if (!films.containsKey(id)) {
             throw new NotFoundException("Фильм с ID=" + id + " не найден!");
-        }
-    }
-
-    private void isValid(Film film) {
-        if (film.getName().isEmpty()) {
-            throw new ValidationException("Название фильма не должно быть пустым!");
-        }
-        if ((film.getDescription().length()) > 200 || (film.getDescription().isEmpty())) {
-            throw new ValidationException("Максимальная длинна описания 200 знаков или пустое: " + film.getDescription().length());
-        }
-        if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
-            throw new ValidationException("Не возможно добавить фильмы с датой релиза раньше: " + film.getReleaseDate());
-        }
-        if (film.getDuration() <= 0) {
-            throw new ValidationException("Задана не верная длительность: " + film.getDuration());
         }
     }
 }

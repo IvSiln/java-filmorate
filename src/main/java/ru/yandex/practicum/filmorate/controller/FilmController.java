@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/films")
@@ -34,8 +35,9 @@ public class FilmController {
     }
 
     @GetMapping("/popular")
-    public List<Film> getPopular(@RequestParam(name = "count", defaultValue = "10") Integer count) {
-        return filmService.getTopFilms(count);
+    public List<Film> getPopular(@RequestParam(required = false) Optional<Integer> count) {
+        if (count.isEmpty()) return filmService.getTopFilms(10);
+        return filmService.getTopFilms(count.get());
     }
 
     @ResponseBody

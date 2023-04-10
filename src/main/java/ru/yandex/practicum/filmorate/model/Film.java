@@ -19,16 +19,25 @@ import java.util.Set;
 @FieldDefaults(level = AccessLevel.PROTECTED)
 public class Film {
     Long id;
+
     @NotBlank String name;
-    @NotBlank @Size(min = 1, max = 200) String description;
+
+    @NotBlank
+    @Size(min = 1, max = 200)
+    String description;
+
     @NotNull
     @JsonFormat(pattern = "yyyy-MM-dd")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     @MinDateRelease
-    @Past(message = "Не верная дате выхода фильма") LocalDate releaseDate;
-    @NotNull @Positive
+    @Past(message = "Не верная дате выхода фильма")
+    LocalDate releaseDate;
+
+    @NotNull
+    @Positive
     @EqualsAndHashCode.Exclude
     Integer duration;
+
     @EqualsAndHashCode.Exclude
     Set<Long> likes;
 

@@ -19,16 +19,21 @@ import java.util.Set;
 @FieldDefaults(level = AccessLevel.PROTECTED)
 public class User {
     Long id;
+
     @Email
     String email;
+
     @NotBlank
     @Pattern(regexp = "\\S*$")
     String login;
+
     @NotBlank
     @NonNull
     String name;
+
     @PastOrPresent
     LocalDate birthday;
+
     Set<Long> friends;
 
     public User(Long id, String email, String login, String name, LocalDate birthday, Set<Long> friends) {
