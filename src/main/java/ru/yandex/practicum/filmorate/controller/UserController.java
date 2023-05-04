@@ -1,72 +1,77 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import lombok.AccessLevel;
-import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import javax.validation.Valid;
-import javax.validation.ValidationException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/users")
 @Slf4j
-@FieldDefaults(level = AccessLevel.PACKAGE)
 public class UserController {
-    static int userId;
-    final Map<Integer, User> userMap;
+    private final UserStorage userStorage;
+    private final UserService userService;
 
-    public UserController() {
-        userMap = new HashMap<>();
-        userId = 0;
-    }
-
-    public Integer generateId() {
-        return ++userId;
-    }
-
-    @PostMapping
-    public User createUser(@Valid @RequestBody User user) {
-        for (User valueComparison : userMap.values()) {
-            if (valueComparison.getEmail().equals(user.getEmail())) {
-                throw new ValidationException("Фильм уже есть в нашей базе");
-            }
-        }
-        user.setId(generateId());
-        if (user.getLogin().contains(" ")) {
-            log.warn(user.getLogin());
-            throw new RuntimeException("Логин не может быть пустым");
-        }
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
-        }
-        userMap.put(user.getId(), user);
-        log.trace("Добавлен пользователь {} ", user);
-        return user;
-    }
-
-    @PutMapping
-    public User update(@Valid @RequestBody User user) {
-        if (userMap.containsKey(user.getId())) {
-            if (user.getName() == null) {
-                user.setName(user.getLogin());
-            }
-            userMap.put(user.getId(), user);
-            log.trace("Обновлен узер: {}", user);
-            return user;
-        } else {
-            throw new ValidationException("В базе нет такого пользователя");
-        }
+    @Autowired
+    public UserController(UserStorage userStorage, UserService userService) {
+        this.userStorage = userStorage;
+        this.userService = userService;
     }
 
     @GetMapping
-    public List<User> userList() {
-        return new ArrayList<>(userMap.values());
+    public List<User> getUsers() {
+        return userStorage.getUsers();
+    }
+
+    @GetMapping("/{id}")
+    public User getUserById(@PathVariable Long id) {
+        return userStorage.getUserById(id);
+    }
+
+    @GetMapping("/{id}/friends")
+    public List<User> getFriends(@PathVariable Long id) {
+        return userService.getFriends(id);
+    }
+
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public List<User> getCommonFriends(@PathVariable Long id, @PathVariable Long otherId) {
+        return userService.getCommonFriends(id, otherId);
+    }
+
+    @PutMapping("/{id}/friends/{friendId}")
+    public void addFriend(@PathVariable Long id, @PathVariable Long friendId) {
+        userService.addFriend(id, friendId);
+    }
+
+    @DeleteMapping("/{id}/friends/{friendId}")
+    public void deleteFriend(@PathVariable Long id, @PathVariable Long friendId) {
+        userService.deleteFriend(id, friendId);
+    }
+
+    @ResponseBody
+    @PostMapping
+    public User create(@Valid @RequestBody User user) {
+        log.info("Получен POST-запрос к эндпоинту: '/users' на добавление пользователя");
+        user = userStorage.create(user);
+        return user;
+    }
+
+    @ResponseBody
+    @PutMapping
+    public User update(@Valid @RequestBody User user) {
+        log.info("Получен PUT-запрос к эндпоинту: '/users' на обновление пользователя с ID={}", user.getId());
+        user = userStorage.update(user);
+        return user;
+    }
+
+    @DeleteMapping("/{id}")
+    public User delete(@PathVariable Long id) {
+        log.info("Получен DELETE-запрос к эндпоинту: '/users' на удаление пользователя с ID={}", id);
+        return userStorage.delete(id);
     }
 }
-

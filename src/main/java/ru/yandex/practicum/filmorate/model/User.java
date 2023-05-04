@@ -1,29 +1,59 @@
 package ru.yandex.practicum.filmorate.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NonNull;
 import lombok.experimental.FieldDefaults;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Past;
+import javax.validation.constraints.PastOrPresent;
+import javax.validation.constraints.Pattern;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
-@AllArgsConstructor
-@Builder(toBuilder = true)
+@Builder
 @FieldDefaults(level = AccessLevel.PROTECTED)
 public class User {
-    Integer id;
-    @Email @NotBlank String email;
-    @NotBlank String login;
+    Long id;
+
+    @Email
+    String email;
+
+    @NotBlank
+    @Pattern(regexp = "\\S*$")
+    String login;
+
+    @NotBlank
+    @NonNull
     String name;
-    @Past(message = "Не верная дата рождения")
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
+
+    @PastOrPresent
     LocalDate birthday;
+
+    Set<Long> friends;
+
+    public User(Long id, String email, String login, String name, LocalDate birthday, Set<Long> friends) {
+        this.id = id;
+        this.email = email;
+        this.login = login;
+        this.name = name;
+        if ((name == null) || (name.isEmpty()) || (name.isBlank())) {
+            this.name = login;
+        }
+        this.birthday = birthday;
+        this.friends = friends;
+        if (friends == null) {
+            this.friends = new HashSet<>();
+        }
+    }
+
+    public void setName(String name) {
+        if ((name == null) || (name.isEmpty()) || (name.isBlank())) {
+            this.name = login;
+        }
+    }
 }
