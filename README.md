@@ -1,2 +1,3 @@
 # java-filmorate
-Template repository for Filmorate project.
+Схема зависимостей filmorate.\
+![Database schema](PUBLIC.png)
