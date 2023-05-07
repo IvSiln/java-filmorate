@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -13,25 +12,21 @@ import ru.yandex.practicum.filmorate.model.ErrorResponse;
 public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleValidationException(ValidationException exception) {
-        return new ErrorResponse(exception.getMessage());
-    }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+    public ErrorResponse handleValidationException(final ValidationException e) {
         return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleNotFoundException(NotFoundException e) {
+    public ErrorResponse handleFilmNotFoundException(NotFoundException e) {
         return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleThrowable(final Throwable e) {
-        return new ErrorResponse("Что-то пошло не так" + e.getMessage());
+        return new ErrorResponse(
+                "Произошла внутренняя ошибка сервера. Пожалуйста, попробуйте позже или свяжитесь с администратором." + e.getMessage()
+        );
     }
 }

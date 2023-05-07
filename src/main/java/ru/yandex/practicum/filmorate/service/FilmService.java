@@ -5,40 +5,47 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Service
 public class FilmService {
-    static final LocalDate START_DATE = LocalDate.of(1985, 12, 28);
     private final InMemoryFilmStorage inMemoryFilmStorage;
+    private final UserService userService;
+    private long counterId;
 
     @Autowired
-    public FilmService(InMemoryFilmStorage inMemoryFilmStorage) {
+    public FilmService(InMemoryFilmStorage inMemoryFilmStorage, UserService userService) {
         this.inMemoryFilmStorage = inMemoryFilmStorage;
+        this.userService = userService;
+        counterId = 0;
     }
 
-    public boolean addLike(Long filmId, Long userId) {
-        return inMemoryFilmStorage.getFilm(filmId).getLikes().add(userId);
+    public long getCounterId() {
+        return counterId;
     }
 
-    public boolean deleteLike(Long filmId, Long userId) {
-        return inMemoryFilmStorage.getFilm(filmId).getLikes().remove(userId);
+    private long setCounterId() {
+        ++counterId;
+        return counterId;
     }
 
     public Film createFilm(Film film) {
-        isValidFilm(film);
-        return inMemoryFilmStorage.createFilm(film);
+        if (inMemoryFilmStorage.getFilmByName(film.getName()).isPresent()) {
+            throw new ValidationException("Уже есть фильм с названием: " + film.getName());
+        } else {
+            film.setId(setCounterId());
+            inMemoryFilmStorage.createFilm(film);
+            return film;
+        }
     }
 
     public Film updateFilm(Film film) {
-        isValidFilm(film);
-        if (inMemoryFilmStorage.isContains(film.getId())) {
-            return inMemoryFilmStorage.updateFilm(film);
-        }
-        throw new NotFoundException("Фильм не найден");
+        Film currentFilm = getFilmById(film.getId());
+        Film updatedFilm = inMemoryFilmStorage.updateFilm(film);
+        return updatedFilm;
     }
 
     public List<Film> getAllFilms() {
@@ -46,19 +53,41 @@ public class FilmService {
     }
 
     public Film getFilmById(long filmId) {
-        if (inMemoryFilmStorage.isContains(filmId)) {
-            return inMemoryFilmStorage.getFilm(filmId);
+        return inMemoryFilmStorage.getFilmById(filmId)
+                .orElseThrow(() -> new NotFoundException("Нет фильма с ID:" + filmId));
+    }
+
+    public Film getFilmByName(String filmName) {
+        return inMemoryFilmStorage.getFilmByName(filmName)
+                .orElseThrow(() -> new NotFoundException("Нет фильма c названием:" + filmName));
+    }
+
+    public Film deleteFilm(long id) {
+        return inMemoryFilmStorage.deleteFilm(id)
+                .orElseThrow(() -> new NotFoundException("Произошла ошибка при удалении фильма с ID:" + id));
+    }
+
+    public void addLike(long filmId, long userId) {
+        Film currentFilm = getFilmById(filmId);
+        User currentUser = userService.getUserById(userId);
+
+        if (!currentFilm.addLike(userId)) {
+            throw new ValidationException(String.format("Пользователь с ID: %d  уже уже поставил лайк фильму с ID: %d " + userId, filmId));
         }
-        throw new NotFoundException("Фильм не найден");
+        inMemoryFilmStorage.updateFilm(currentFilm);
+    }
+
+    public void deleteLike(long filmId, long userId) {
+        Film currentFilm = getFilmById(filmId);
+        User currentUser = userService.getUserById(userId);
+
+        if (!currentFilm.deleteLike(userId)) {
+            throw new ValidationException(String.format("Пользователь с ID: %d не ставил лайк фильму с ID: %d", userId, filmId));
+        }
+        inMemoryFilmStorage.updateFilm(currentFilm);
     }
 
     public List<Film> getTopFilms(int count) {
         return inMemoryFilmStorage.getTopFilms(count);
-    }
-
-    public void isValidFilm(Film film) {
-        if (film.getReleaseDate().isBefore(START_DATE)) {
-            throw new ValidationException("Дата выхода фильма не может быть раньше " + START_DATE);
-        }
     }
 }

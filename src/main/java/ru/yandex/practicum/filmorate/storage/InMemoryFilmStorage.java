@@ -1,23 +1,26 @@
 package ru.yandex.practicum.filmorate.storage;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
-@Slf4j
 public class InMemoryFilmStorage implements FilmStorage {
-    private final Map<Long, Film> films = new HashMap<>();
+    private long counterId;
+    private List<Film> films;
+
+    public InMemoryFilmStorage() {
+        films = new ArrayList<>();
+    }
 
     @Override
     public Film createFilm(Film film) {
-        films.put(film.getId(), film);
+        films.add(film);
         return film;
     }
 
@@ -28,23 +31,34 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Film getFilm(Long id) {
-        return films.get(id);
+    public Optional<Film> deleteFilm(long id) {
+        Film deletedFilm = null;
+        Iterator<Film> filmIterator = films.iterator();
+        while (filmIterator.hasNext()) {
+            Film nextFilm = filmIterator.next();
+            if (nextFilm.getId() == id) {
+                deletedFilm = nextFilm;
+                filmIterator.remove();
+            }
+        }
+        return Optional.ofNullable(deletedFilm);
     }
 
     @Override
     public List<Film> getAllFilms() {
-        return new ArrayList<>(films.values());
+        return films;
     }
 
-    @Override
-    public boolean isContains(Long id) {
-        return films.containsKey(id);
+    public Optional<Film> getFilmById(long filmId) {
+        return films.stream()
+                .filter(f -> f.getId() == filmId)
+                .findFirst();
     }
 
-    @Override
-    public Film deleteFilm(long id) {
-        return films.remove(id);
+    public Optional<Film> getFilmByName(String filmName) {
+        return getAllFilms().stream()
+                .filter(f -> f.getName().equals(filmName))
+                .findFirst();
     }
 
     public List<Film> getTopFilms(int count) {

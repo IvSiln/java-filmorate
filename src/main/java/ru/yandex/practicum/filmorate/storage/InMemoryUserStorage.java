@@ -1,19 +1,18 @@
 package ru.yandex.practicum.filmorate.storage;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
-@Slf4j
 public class InMemoryUserStorage implements UserStorage {
-    private final Map<Long, User> users = new HashMap<>();
+    private Map<Long, User> users;
+
+    public InMemoryUserStorage() {
+        users = new TreeMap<>();
+    }
 
     public Map<Long, User> getUsers() {
         return users;
@@ -21,6 +20,12 @@ public class InMemoryUserStorage implements UserStorage {
 
     public User getUserById(long id) {
         return getUsers().get(id);
+    }
+
+    public Optional<User> getUserByEmail(String email) {
+        return getAllUsers().stream()
+                .filter(u -> u.getEmail().equals(email))
+                .findFirst();
     }
 
     @Override
@@ -31,9 +36,14 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User updateUser(User user) {
-        deleteUser(user.getId());
+        users.remove(user.getId());
         users.put(user.getId(), user);
         return user;
+    }
+
+    @Override
+    public User deleteUser(User user) { // Пока удаление пользователя не предусмотрено в ТЗ
+        return null;
     }
 
     @Override
@@ -45,32 +55,22 @@ public class InMemoryUserStorage implements UserStorage {
         return userList;
     }
 
-    @Override
-    public User deleteUser(long id) {
-        return users.remove(id);
-    }
-
-    @Override
-    public boolean isContains(long friendId) {
-        return users.containsKey(friendId);
-    }
-
     public List<User> getAllFriends(long userId) {
-        List<User> userFriends = new ArrayList<>();
-        if (getUserById(userId).getFriends() != null) {
-            for (long id : getUserById(userId).getFriends()) {
-                userFriends.add(getUserById(id));
-            }
+        List<User> allFriends = new ArrayList<>();
+        for (Long id : getUserById(userId).getFriends()) {
+            allFriends.add(getUserById(id));
         }
-        return userFriends;
+        return allFriends;
     }
 
     public List<User> getCommonFriends(long id, long otherId) {
         List<User> commonFriends = new ArrayList<>();
         List<User> userFriends = getAllFriends(id);
         List<User> otherUserFriends = getAllFriends(otherId);
-        if (otherUserFriends != null) {
-            commonFriends = userFriends.stream().filter(otherUserFriends::contains).collect(Collectors.toList());
+        if (commonFriends != null && otherUserFriends != null) {
+            commonFriends = userFriends.stream()
+                    .filter(otherUserFriends::contains)
+                    .collect(Collectors.toList());
         }
         return commonFriends;
     }
