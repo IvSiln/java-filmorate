@@ -34,8 +34,6 @@ public class User {
 
     private List<Long> friends;
 
-
-
     public User() {
         this.id = 0;
         this.friends = new ArrayList<>();
@@ -61,7 +59,6 @@ public class User {
     public boolean deleteFriend(Long id) {
         return  friends.remove(id);
     }
-
 
     @Override
     public boolean equals(Object o) {

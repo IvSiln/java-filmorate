@@ -81,6 +81,4 @@ public class FilmController {
         List<Film> topFilms = filmService.getTopFilms(count);
         return topFilms;
     }
-
-
 }
