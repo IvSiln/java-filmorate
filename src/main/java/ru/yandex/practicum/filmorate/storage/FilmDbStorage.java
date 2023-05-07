@@ -21,7 +21,7 @@ import java.util.*;
 @Repository
 @Slf4j
 public class FilmDbStorage implements FilmStorage {
-    private final static int SQLSIZE = 100;
+    private static final int SQLSIZE = 100;
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert insertIntoFilm;
 
