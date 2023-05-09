@@ -2,6 +2,8 @@ package ru.yandex.practicum.filmorate.storage;
 
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -11,12 +13,9 @@ import java.util.stream.Collectors;
 
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
-    private long counterId;
-    private List<Film> films;
+    private Long counterId;
+    private List<Film> films = new ArrayList<>();
 
-    public InMemoryFilmStorage() {
-        films = new ArrayList<>();
-    }
 
     @Override
     public Film createFilm(Film film) {
@@ -49,9 +48,15 @@ public class InMemoryFilmStorage implements FilmStorage {
         return films;
     }
 
+    @Override
+    public List<Film> getTopFilms(Integer count) {
+        return null;
+    }
+
+    @Override
     public Optional<Film> getFilmById(long filmId) {
         return films.stream()
-                .filter(f -> f.getId() == filmId)
+                .filter(film -> film.getId() == filmId)
                 .findFirst();
     }
 
@@ -65,5 +70,36 @@ public class InMemoryFilmStorage implements FilmStorage {
         return getAllFilms().stream()
                 .sorted((f0, f1) -> Integer.compare(f1.getLikes().size(), f0.getLikes().size()))
                 .limit(count).collect(Collectors.toList());
+    }
+
+    public List<Genre> getAllGenres() {
+        throw new UnsupportedOperationException("Functionality not implemented");
+    }
+
+    public List<Mpa> getAllMpa() {
+        throw new UnsupportedOperationException("Functionality not implemented");
+    }
+
+    public Mpa getMpaById(long id) {
+        throw new UnsupportedOperationException("Functionality not implemented");
+    }
+
+    public Genre getGenreById(long id) {
+        throw new UnsupportedOperationException("Functionality not implemented");
+    }
+
+    public boolean isFilmExist(Long filmId) {
+        throw new UnsupportedOperationException("Functionality not implemented");
+    }
+
+    @Override
+    public void addLike(Long filmId, Long userId) {
+        throw new UnsupportedOperationException("Functionality not implemented");
+    }
+
+    @Override
+    public void deleteLike(Long filmId, Long userId) {
+        throw new UnsupportedOperationException("Functionality not implemented");
+
     }
 }

@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
 
 @Repository
@@ -16,12 +18,27 @@ import java.util.*;
 public class UserDbStorage implements UserStorage {
 
     private final JdbcTemplate jdbcTemplate;
-    private final SimpleJdbcInsert insertIntoUser;
 
     @Autowired
     public UserDbStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-        insertIntoUser = new SimpleJdbcInsert(this.jdbcTemplate).withTableName("users").usingGeneratedKeyColumns("user_id");
+    }
+
+    public User makeUser(SqlRowSet rs) {
+        try {
+            return new User(
+                    rs.getLong("user_id"),
+                    rs.getString("email"),
+                    rs.getString("login"),
+                    rs.getString("name"),
+                    Objects.requireNonNull(rs.getDate("birthday")).toLocalDate(),
+                    getUserFriends(rs.getLong("user_id"))
+            );
+        } catch (DataAccessException e) {
+            // Обработка исключения
+            log.error("Ошибка при создании объекта User", e);
+            return null;
+        }
     }
 
     @Override
@@ -30,7 +47,9 @@ public class UserDbStorage implements UserStorage {
         parameters.put("email", user.getEmail());
         parameters.put("login", user.getLogin());
         parameters.put("name", user.getName());
+        SimpleJdbcInsert insertIntoUser;
         parameters.put("birthday", user.getBirthday());
+        insertIntoUser = new SimpleJdbcInsert(this.jdbcTemplate).withTableName("users").usingGeneratedKeyColumns("user_id");
         Long userId = (Long) insertIntoUser.executeAndReturnKey(parameters);
         return getUserById(userId);
     }
@@ -53,45 +72,18 @@ public class UserDbStorage implements UserStorage {
     public User deleteUser(User deleteUser) {
         User user = getUserById(deleteUser.getId());
         if (user != null) {
-            String sqlQuery = "delete from users where user_id = ?";
+            String sqlQuery = "DELETE FROM users WHERE user_id = ?";
             int numberOfRowAffected = jdbcTemplate.update(sqlQuery, deleteUser.getId());
-            if (numberOfRowAffected > 0) {
-                return user;
-            } else return null;
-        } else return null;
-    }
-
-    public User getUserById(Long id) {
-        String sqlQuery = "SELECT * FROM USERS WHERE user_id = ?";
-        SqlRowSet userRows = jdbcTemplate.queryForRowSet(sqlQuery, id);
-        if (userRows.next()) {
-            log.info("Найден пользователь: {} {}", userRows.getString("user_id"), userRows.getString("name"));
-            User user = new User(
-                    userRows.getLong("user_id"),
-                    userRows.getString("email"),
-                    userRows.getString("login"),
-                    userRows.getString("name"),
-                    userRows.getDate("birthday").toLocalDate(),
-                    getUserFriends(id));
-            return user;
-        } else {
-            log.info("Пользователь с идентификатором {} не найден.", id);
-            return null;
+            return numberOfRowAffected > 0 ? user : null;
         }
+        return null;
     }
 
     public Optional<User> getUserByEmail(String email) {
         SqlRowSet userRows = jdbcTemplate.queryForRowSet("select * from users where email = ?", email);
         if (userRows.next()) {
             log.info("Найден пользователь: {} {}", userRows.getString("user_id"), userRows.getString("name"));
-            Optional<User> user = Optional.of(new User(
-                    userRows.getLong("user_id"),
-                    userRows.getString("email"),
-                    userRows.getString("login"),
-                    userRows.getString("name"),
-                    userRows.getDate("birthday").toLocalDate(),
-                    getUserFriends(userRows.getLong("user_id"))));
-            return user;
+            return Optional.of(makeUser(userRows));
         } else {
             log.info("Пользователь с email {} не найден.", email);
             return Optional.empty();
@@ -100,14 +92,12 @@ public class UserDbStorage implements UserStorage {
 
     public User deleteUserById(Long id) {
         User user = getUserById(id);
-        if (user != null) {
-            String sqlQuery = "delete from users where user_id = ?";
-            int numberOfRowAffected = jdbcTemplate.update(sqlQuery, id);
-            if (numberOfRowAffected > 0) {
-                return user;
-            } else return null;
-        } else return null;
+        if (user != null && jdbcTemplate.update("DELETE FROM users WHERE user_id = ?", id) > 0) {
+            return user;
+        }
+        return null;
     }
+
 
     public List<Long> getUserFriends(Long userId) {
         List<Long> userFriends = new ArrayList<>();
@@ -202,4 +192,16 @@ public class UserDbStorage implements UserStorage {
         ));
     }
 
+    @Override
+    public User getUserById(long id) {
+        String sqlQuery = "SELECT * FROM USERS WHERE user_id = ?";
+        SqlRowSet userRows = jdbcTemplate.queryForRowSet(sqlQuery, id);
+        if (userRows.next()) {
+            log.info("Найден пользователь: {} {}", userRows.getString("user_id"), userRows.getString("name"));
+            return makeUser(userRows);
+        } else {
+            log.info("Пользователь с идентификатором {} не найден.", id);
+            return null;
+        }
+    }
 }

@@ -25,8 +25,6 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleThrowable(final Throwable e) {
-        return new ErrorResponse(
-                "Произошла внутренняя ошибка сервера. Пожалуйста, попробуйте позже или свяжитесь с администратором." + e.getMessage()
-        );
+        return new ErrorResponse("Произошла внутренняя ошибка сервера. Пожалуйста, попробуйте позже или свяжитесь с администратором." + e.getMessage());
     }
 }

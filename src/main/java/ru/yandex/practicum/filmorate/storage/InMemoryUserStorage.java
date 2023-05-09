@@ -29,6 +29,26 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
+    public boolean isFriend(long userId, long friendId) {
+        throw new UnsupportedOperationException("Functionality not implemented");
+    }
+
+    @Override
+    public boolean addFriend(long userId, long friendId) {
+        return false;
+    }
+
+    @Override
+    public boolean deleteFriend(long userId, long friendId) {
+        throw new UnsupportedOperationException("Functionality not implemented");
+    }
+
+    @Override
+    public List<User> getCommonFriends(Long id, Long otherId) {
+        throw new UnsupportedOperationException("Functionality not implemented");
+    }
+
+    @Override
     public User createUser(User user) {
         users.put(user.getId(), user);
         return user;
@@ -53,6 +73,11 @@ public class InMemoryUserStorage implements UserStorage {
             userList.add(entry.getValue());
         }
         return userList;
+    }
+
+    @Override
+    public boolean isUserExist(Long userId) {
+        throw new UnsupportedOperationException("Functionality not implemented");
     }
 
     public List<User> getAllFriends(long userId) {

@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.service.FilmDbService;
+import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.util.List;
 
@@ -15,10 +15,10 @@ import java.util.List;
 @Slf4j
 @RequestMapping("/genres")
 public class GenreController {
-    private final FilmDbService filmService;
+    private final FilmService filmService;
 
     @Autowired
-    public GenreController(FilmDbService filmService) {
+    public GenreController(FilmService filmService) {
         this.filmService = filmService;
     }
 
