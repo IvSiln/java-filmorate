@@ -53,11 +53,11 @@ public class User {
     }
 
     public boolean addFriend(Long id) {
-        return  friends.add(id);
+        return friends.add(id);
     }
 
     public boolean deleteFriend(Long id) {
-        return  friends.remove(id);
+        return friends.remove(id);
     }
 
     @Override
