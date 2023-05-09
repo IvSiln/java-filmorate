@@ -29,6 +29,26 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
+    public boolean isFriend(long userId, long friendId) {
+        throw new UnsupportedOperationException("Functionality not implemented");
+    }
+
+    @Override
+    public boolean addFriend(long userId, long friendId) {
+        return false;
+    }
+
+    @Override
+    public boolean deleteFriend(long userId, long friendId) {
+        throw new UnsupportedOperationException("Functionality not implemented");
+    }
+
+    @Override
+    public List<User> getCommonFriends(Long id, Long otherId) {
+        throw new UnsupportedOperationException("Functionality not implemented");
+    }
+
+    @Override
     public User createUser(User user) {
         users.put(user.getId(), user);
         return user;
@@ -55,6 +75,11 @@ public class InMemoryUserStorage implements UserStorage {
         return userList;
     }
 
+    @Override
+    public boolean isUserExist(Long userId) {
+        throw new UnsupportedOperationException("Functionality not implemented");
+    }
+
     public List<User> getAllFriends(long userId) {
         List<User> allFriends = new ArrayList<>();
         for (Long id : getUserById(userId).getFriends()) {
@@ -67,7 +92,7 @@ public class InMemoryUserStorage implements UserStorage {
         List<User> commonFriends = new ArrayList<>();
         List<User> userFriends = getAllFriends(id);
         List<User> otherUserFriends = getAllFriends(otherId);
-        if (commonFriends != null && otherUserFriends != null) {
+        if (otherUserFriends != null) {
             commonFriends = userFriends.stream()
                     .filter(otherUserFriends::contains)
                     .collect(Collectors.toList());
