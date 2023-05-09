@@ -95,6 +95,7 @@ public class FilmDbStorage implements FilmStorage {
     @SneakyThrows
     public void addGenresByFilmId(long filmId, List<Genre> genres) {
         DataSource ds = jdbcTemplate.getDataSource();
+        assert ds != null;
         Connection connection = ds.getConnection();
         connection.setAutoCommit(false);
         String sqlQuery = "INSERT INTO FILMGENRES (film_id, genre_id) values (?,?)";
@@ -134,12 +135,12 @@ public class FilmDbStorage implements FilmStorage {
 
     public Set<Long> getDistinctGenreIdsByFilmId(long filmId) {
         String sqlQuery = "SELECT DISTINCT genre_id FROM GENRES WHERE film_id = ?";
-        return new HashSet<Long>(jdbcTemplate.queryForList(sqlQuery, Long.class, filmId));
+        return new HashSet<>(jdbcTemplate.queryForList(sqlQuery, Long.class, filmId));
     }
 
-    public List<Genre> getGenresByFilmId(long filmId) {
+    public List getGenresByFilmId(long filmId) {
         String sqlQuery = "SELECT * FROM genres WHERE genre_id IN ( SELECT DISTINCT genre_id FROM FILMGENRES WHERE film_id = ?)";
-        List genres = new ArrayList<>();
+        List genres;
         genres = jdbcTemplate.query(sqlQuery,
                 (rs, rowNum) ->
                         new Genre(

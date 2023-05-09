@@ -92,7 +92,7 @@ public class InMemoryUserStorage implements UserStorage {
         List<User> commonFriends = new ArrayList<>();
         List<User> userFriends = getAllFriends(id);
         List<User> otherUserFriends = getAllFriends(otherId);
-        if (commonFriends != null && otherUserFriends != null) {
+        if (otherUserFriends != null) {
             commonFriends = userFriends.stream()
                     .filter(otherUserFriends::contains)
                     .collect(Collectors.toList());
