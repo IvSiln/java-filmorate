@@ -59,7 +59,7 @@ public class FilmService implements FilmStorage {
     }
 
     public Optional<Film> getFilmById(long id) {
-        if (filmStorage.getFilmById(id) == null) {
+        if (filmStorage.getFilmById(id).isEmpty()) {
             throw new NotFoundException("Фильм с ID: " + id + "не найден");
         }
         return filmStorage.getFilmById(id);

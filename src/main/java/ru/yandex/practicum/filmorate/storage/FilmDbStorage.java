@@ -34,7 +34,7 @@ public class FilmDbStorage implements FilmStorage {
 
     private Film makeFilm(ResultSet rs) {
         try {
-            Long filmId = rs.getLong("film_id");
+            long filmId = rs.getLong("film_id");
             String name = rs.getString("name");
             String description = rs.getString("description");
             LocalDate releaseDate = rs.getDate("release_date").toLocalDate();
@@ -62,7 +62,7 @@ public class FilmDbStorage implements FilmStorage {
                 .withTableName("films")
                 .usingGeneratedKeyColumns("film_id");
 
-        Long filmId = (Long) insertIntoFilm.executeAndReturnKey(parameters);
+        long filmId = (Long) insertIntoFilm.executeAndReturnKey(parameters);
 
         addGenresByFilmId(filmId, film.getGenres());
 
@@ -153,7 +153,7 @@ public class FilmDbStorage implements FilmStorage {
 
     public Set<Long> getLikes(long filmId) {
         String sqlQuery = "SELECT DISTINCT user_id FROM LIKES WHERE film_id = ?";
-        return new HashSet<Long>(jdbcTemplate.queryForList(sqlQuery, Long.class, filmId));
+        return new HashSet<>(jdbcTemplate.queryForList(sqlQuery, Long.class, filmId));
     }
 
     @Override
@@ -214,10 +214,7 @@ public class FilmDbStorage implements FilmStorage {
         String sqlQuery = "SELECT 1 FROM FILMS WHERE film_id=?";
         return Boolean.TRUE.equals(jdbcTemplate.query(sqlQuery,
                 (ResultSet rs) -> {
-                    if (rs.next()) {
-                        return true;
-                    }
-                    return false;
+                    return rs.next();
                 }, filmId
         ));
     }
