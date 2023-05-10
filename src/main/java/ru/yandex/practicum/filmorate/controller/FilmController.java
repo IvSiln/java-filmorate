@@ -10,7 +10,8 @@ import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
 
 @RestController
 @Slf4j
@@ -73,9 +74,6 @@ public class FilmController {
 
     @GetMapping("/popular")
     public ResponseEntity<List<Film>> getTopFilms(@RequestParam(value = "count", defaultValue = "10", required = false) @Positive(message = "count должен быть больше 0") Integer count) {
-        if (count <= 0) {
-            throw new IllegalArgumentException("count должен быть целым числом больше 0, получено " + count);
-        }
         List<Film> topFilms = filmService.getTopFilms(count);
         return ResponseEntity.ok(topFilms);
     }

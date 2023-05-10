@@ -20,11 +20,8 @@ public class UserService {
     }
 
     public User getUserById(long id) {
-        if (userStorage.getUserById(id) != null) {
-            return userStorage.getUserById(id);
-        } else {
-            throw new NotFoundException("Не найден пользователь с ID: " + id);
-        }
+        Optional<User> optionalUser = Optional.ofNullable(userStorage.getUserById(id));
+        return optionalUser.orElseThrow(() -> new NotFoundException("Не найден пользователь с ID: " + id));
     }
 
     public Optional<User> getUserByEmail(String email) {
@@ -90,21 +87,11 @@ public class UserService {
         return true;
     }
 
-
     public List<User> getAllFriends(Long userId) {
-        if (getUserById(userId) == null) {
-            throw new NotFoundException("Пользователь с ID " + userId + " не существует.");
-        }
         return userStorage.getAllFriends(userId);
     }
 
     public List<User> getCommonFriends(Long id, Long otherId) {
-        if (getUserById(id) == null) {
-            throw new NotFoundException("Пользователь с ID " + id + " не существует.");
-        }
-        if (getUserById(otherId) == null) {
-            throw new NotFoundException("Пользователь с ID " + otherId + " не существует.");
-        }
         return userStorage.getCommonFriends(id, otherId);
     }
 

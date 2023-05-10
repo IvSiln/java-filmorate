@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.storage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
@@ -23,7 +24,7 @@ public class UserDbStorage implements UserStorage {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public User makeUser(SqlRowSet rs) {
+    public User makeUser(SqlRowSet rs) throws EmptyResultDataAccessException {
         try {
             return new User(
                     rs.getLong("user_id"),
@@ -34,9 +35,8 @@ public class UserDbStorage implements UserStorage {
                     getUserFriends(rs.getLong("user_id"))
             );
         } catch (DataAccessException e) {
-            // Обработка исключения
-            log.error("Ошибка при создании объекта User", e);
-            return null;
+            // Пробрасывание исключения на уровень вызывающего метода с сообщением об ошибке
+            throw new EmptyResultDataAccessException("Ошибка при создании объекта User", 1, e);
         }
     }
 
@@ -132,12 +132,12 @@ public class UserDbStorage implements UserStorage {
 
     public boolean deleteFriend(long userId, long friendId) {
         String sqlQuery = "DELETE FROM userfriends WHERE user_id = ? AND friend_id = ?";
-        return jdbcTemplate.update(sqlQuery, new Object[]{userId, friendId}) == 1;
+        return jdbcTemplate.update(sqlQuery, userId, friendId) == 1;
     }
 
     public boolean isFriend(long userId, long friendId) {
         String sqlQuery = "SELECT count(*) FROM userfriends WHERE user_id = ? AND friend_id = ?";
-        return jdbcTemplate.queryForObject(sqlQuery, Integer.class, new Object[]{userId, friendId}) > 0;
+        return jdbcTemplate.queryForObject(sqlQuery, Integer.class, userId, friendId) > 0;
     }
 
     public int confirmFriendShip(long userId, int friendId) {
@@ -176,17 +176,14 @@ public class UserDbStorage implements UserStorage {
                                 rs.getString("name"),
                                 rs.getDate("birthday").toLocalDate(),
                                 getUserFriends(rs.getLong("user_id"))),
-                new Object[]{id, otherId});
+                id, otherId);
     }
 
     public boolean isUserExist(Long userId) {
         String sqlQuery = "SELECT 1 FROM USERS WHERE user_id=?";
         return Boolean.TRUE.equals(jdbcTemplate.query(sqlQuery,
                 (ResultSet rs) -> {
-                    if (rs.next()) {
-                        return true;
-                    }
-                    return false;
+                    return rs.next();
                 }, userId
         ));
     }
