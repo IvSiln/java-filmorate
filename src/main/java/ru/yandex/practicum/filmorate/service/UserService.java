@@ -88,10 +88,19 @@ public class UserService {
     }
 
     public List<User> getAllFriends(Long userId) {
+        if (!userStorage.isUserExist(userId)) {
+            throw new NotFoundException("Пользователь с ID " + userId + " не существует.");
+        }
         return userStorage.getAllFriends(userId);
     }
 
     public List<User> getCommonFriends(Long id, Long otherId) {
+        if (!userStorage.isUserExist(id)) {
+            throw new NotFoundException("Пользователь с ID " + id + " не существует.");
+        }
+        if (!userStorage.isUserExist(otherId)) {
+            throw new NotFoundException("Пользователь с ID " + otherId + " не существует.");
+        }
         return userStorage.getCommonFriends(id, otherId);
     }
 
