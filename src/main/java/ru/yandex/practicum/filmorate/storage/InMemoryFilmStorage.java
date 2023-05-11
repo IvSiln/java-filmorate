@@ -1,64 +1,105 @@
 package ru.yandex.practicum.filmorate.storage;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Component
-@Slf4j
 public class InMemoryFilmStorage implements FilmStorage {
-    private final Map<Long, Film> films;
-    private Long currentId;
+    private Long counterId;
+    private List<Film> films = new ArrayList<>();
 
-    public InMemoryFilmStorage() {
-        films = new HashMap<>();
-        currentId = 0L;
-    }
 
     @Override
-    public List<Film> getFilms() {
-        return new ArrayList<>(films.values());
-    }
-
-    @Override
-    public Film create(Film film) {
-        film.setId(++currentId);
-        films.put(film.getId(), film);
+    public Film createFilm(Film film) {
+        films.add(film);
         return film;
     }
 
     @Override
-    public Film update(Film film) {
-        check(film.getId());
-        films.put(film.getId(), film);
-        return film;
+    public Film updateFilm(Film film) {
+        deleteFilm(film.getId());
+        return createFilm(film);
     }
 
     @Override
-    public Film getFilmById(Long filmId) {
-        check(filmId);
-        return films.get(filmId);
+    public Optional<Film> deleteFilm(long id) {
+        Film deletedFilm = null;
+        Iterator<Film> filmIterator = films.iterator();
+        while (filmIterator.hasNext()) {
+            Film nextFilm = filmIterator.next();
+            if (nextFilm.getId() == id) {
+                deletedFilm = nextFilm;
+                filmIterator.remove();
+            }
+        }
+        return Optional.ofNullable(deletedFilm);
     }
 
     @Override
-    public Film delete(Long filmId) {
-        check(filmId);
-        return films.remove(filmId);
+    public List<Film> getAllFilms() {
+        return films;
     }
 
-    private void check(Long id) {
-        if (id == null) {
-            throw new ValidationException("Фильму не присвоен id");
-        }
-        if (!films.containsKey(id)) {
-            throw new NotFoundException("Фильм с ID=" + id + " не найден!");
-        }
+    @Override
+    public List<Film> getTopFilms(Integer count) {
+        return null;
+    }
+
+    @Override
+    public Optional<Film> getFilmById(long filmId) {
+        return films.stream()
+                .filter(film -> film.getId() == filmId)
+                .findFirst();
+    }
+
+    public Optional<Film> getFilmByName(String filmName) {
+        return getAllFilms().stream()
+                .filter(f -> f.getName().equals(filmName))
+                .findFirst();
+    }
+
+    public List<Film> getTopFilms(int count) {
+        return getAllFilms().stream()
+                .sorted((f0, f1) -> Integer.compare(f1.getLikes().size(), f0.getLikes().size()))
+                .limit(count).collect(Collectors.toList());
+    }
+
+    public List<Genre> getAllGenres() {
+        throw new UnsupportedOperationException("Functionality not implemented");
+    }
+
+    public List<Mpa> getAllMpa() {
+        throw new UnsupportedOperationException("Functionality not implemented");
+    }
+
+    public Mpa getMpaById(long id) {
+        throw new UnsupportedOperationException("Functionality not implemented");
+    }
+
+    public Genre getGenreById(long id) {
+        throw new UnsupportedOperationException("Functionality not implemented");
+    }
+
+    public boolean isFilmExist(Long filmId) {
+        throw new UnsupportedOperationException("Functionality not implemented");
+    }
+
+    @Override
+    public void addLike(Long filmId, Long userId) {
+        throw new UnsupportedOperationException("Functionality not implemented");
+    }
+
+    @Override
+    public void deleteLike(Long filmId, Long userId) {
+        throw new UnsupportedOperationException("Functionality not implemented");
+
     }
 }

@@ -1,59 +1,79 @@
 package ru.yandex.practicum.filmorate.model;
 
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NonNull;
-import lombok.experimental.FieldDefaults;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.PastOrPresent;
-import javax.validation.constraints.Pattern;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
+import javax.validation.constraints.*;
 
-@Data
-@Builder
-@FieldDefaults(level = AccessLevel.PROTECTED)
+@Getter
+@Setter
 public class User {
-    Long id;
+
+    private long id;
 
     @Email
-    String email;
+    @NotBlank
+    private String email;
 
     @NotBlank
-    @Pattern(regexp = "\\S*$")
-    String login;
-
     @NotBlank
-    @NonNull
-    String name;
+    @Pattern(regexp = "^[^\\s]*$")
+    private String login;
 
-    @PastOrPresent
-    LocalDate birthday;
+    private String name;
 
-    Set<Long> friends;
+    @NotNull
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @Past(message = "Не верная дата рождения")
+    private LocalDate birthday;
 
-    public User(Long id, String email, String login, String name, LocalDate birthday, Set<Long> friends) {
+    private List<Long> friends;
+
+    public User() {
+        this.id = 0;
+        this.friends = new ArrayList<>();
+    }
+
+    public User(long id, String email, String login, String name, LocalDate birthday, List<Long> friends) {
         this.id = id;
         this.email = email;
         this.login = login;
         this.name = name;
-        if ((name == null) || (name.isEmpty()) || (name.isBlank())) {
-            this.name = login;
-        }
         this.birthday = birthday;
         this.friends = friends;
-        if (friends == null) {
-            this.friends = new HashSet<>();
-        }
     }
 
-    public void setName(String name) {
-        if ((name == null) || (name.isEmpty()) || (name.isBlank())) {
-            this.name = login;
+    public List<Long> getFriends() {
+        return friends;
+    }
+
+    public boolean addFriend(Long id) {
+        return friends.add(id);
+    }
+
+    public boolean deleteFriend(Long id) {
+        return friends.remove(id);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
         }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        User user = (User) o;
+        return id == user.id && email.equals(user.email);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, email);
     }
 }

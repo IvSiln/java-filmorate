@@ -2,70 +2,79 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
 import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/films")
 @Slf4j
+@RequestMapping("/films")
 public class FilmController {
-    private final FilmStorage filmStorage;
     private final FilmService filmService;
 
     @Autowired
-    public FilmController(FilmStorage filmStorage, FilmService filmService) {
-        this.filmStorage = filmStorage;
+    public FilmController(FilmService filmService) {
         this.filmService = filmService;
     }
 
     @GetMapping
-    public List<Film> getFilms() {
-        return filmStorage.getFilms();
+    public ResponseEntity<List<Film>> getFilms() {
+        List<Film> films = filmService.getAllFilms();
+        return ResponseEntity.ok(films);
     }
 
     @GetMapping("/{id}")
-    public Film getFilmById(@PathVariable Long id) {
-        return filmStorage.getFilmById(id);
+    public ResponseEntity<Film> getFilm(@PathVariable long id) {
+        Optional<Film> film = filmService.getFilmById(id);
+        log.trace("Requested film: {}", film);
+        return film.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/popular")
-    public List<Film> getPopular(@RequestParam(required = false) Optional<Integer> count) {
-        if (count.isEmpty()) return filmService.getTopFilms(10);
-        return filmService.getTopFilms(count.get());
-    }
-
-    @ResponseBody
     @PostMapping
-    public Film create(@Valid @RequestBody Film film) {
-        film = filmStorage.create(film);
-        return film;
+    public ResponseEntity<Film> addFilm(@Valid @RequestBody Film newFilm) {
+        Film createdFilm = filmService.createFilm(newFilm);
+        log.trace("Добавлен фильм: " + createdFilm);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdFilm);
     }
 
-    @ResponseBody
     @PutMapping
-    public Film update(@Valid @RequestBody Film film) {
-        film = filmStorage.update(film);
-        return film;
-    }
-
-    @PutMapping("/{id}/like/{userId}")
-    public void addLike(@PathVariable Long id, @PathVariable Long userId) {
-        filmService.addLike(id, userId);
-    }
-
-    @DeleteMapping("/{id}/like/{userId}")
-    public void deleteLike(@PathVariable Long id, @PathVariable Long userId) {
-        filmService.deleteLike(id, userId);
+    public ResponseEntity<Film> updateFilm(@Valid @RequestBody Film updateFilm) {
+        Film updatedFilm = filmService.updateFilm(updateFilm);
+        log.trace("Обновлен фильм: " + updatedFilm);
+        return ResponseEntity.ok(updatedFilm);
     }
 
     @DeleteMapping("/{id}")
-    public Film delete(@PathVariable Long id) {
-        return filmStorage.delete(id);
+    public ResponseEntity<Film> deleteFilm(@PathVariable long id) {
+        Optional<Film> deletedFilm = filmService.deleteFilm(id);
+        log.trace("Deleted film: {}", deletedFilm);
+        return deletedFilm.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/{id}/like/{userId}")
+    public ResponseEntity<Void> addLike(@PathVariable Long id, @PathVariable Long userId) {
+        filmService.addLike(id, userId);
+        log.trace(String.format("Пользователь с ID: %d отметил лайком фильм с ID: %d", userId, id));
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @DeleteMapping("/{id}/like/{userId}")
+    public ResponseEntity<Void> deleteLike(@PathVariable Long id, @PathVariable Long userId) {
+        filmService.deleteLike(id, userId);
+        log.trace(String.format("Пользователь с ID: %d удалил лайк фильма с ID: %d ", userId, id));
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @GetMapping("/popular")
+    public ResponseEntity<List<Film>> getTopFilms(@RequestParam(value = "count", defaultValue = "10", required = false) @Positive(message = "count должен быть больше 0") Integer count) {
+        List<Film> topFilms = filmService.getTopFilms(count);
+        return ResponseEntity.ok(topFilms);
     }
 }

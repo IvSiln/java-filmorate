@@ -1,17 +1,37 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface FilmStorage {
-    List<Film> getFilms();
 
-    Film create(Film film);
+    Film createFilm(Film film);
 
-    Film update(Film film);
+    Film updateFilm(Film film);
 
-    Film getFilmById(Long filmId);
+    Optional<Film> deleteFilm(long id);
 
-    Film delete(Long filmId);
+    List<Film> getAllFilms();
+
+    List<Film> getTopFilms(Integer count);
+
+    Optional<Film> getFilmById(long filmId);
+
+    List<Genre> getAllGenres();
+
+    List<Mpa> getAllMpa();
+
+    Mpa getMpaById(long id);
+
+    Genre getGenreById(long id);
+
+    boolean isFilmExist(Long filmId);
+
+    void addLike(Long filmId, Long userId);
+
+    void deleteLike(Long filmId, Long userId);
 }
